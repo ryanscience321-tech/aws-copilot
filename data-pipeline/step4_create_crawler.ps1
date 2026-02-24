@@ -1,5 +1,5 @@
 # =============================================================
-# STEP 4 — Create Glue Database + Crawler, then run the Crawler
+# STEP 4 - Create Glue Database + Crawler, then run the Crawler
 #
 # WHAT THIS DOES:
 #   1. Creates a Glue Data Catalog database called "data_pipeline_db"
@@ -12,7 +12,7 @@
 # =============================================================
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host " STEP 4: Glue Crawler — Discover Schema" -ForegroundColor Cyan
+Write-Host " STEP 4: Glue Crawler - Discover Schema" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
 Write-Host "`n[1/6] Reading pipeline config..." -ForegroundColor Yellow
@@ -34,8 +34,9 @@ Write-Host "       Crawler    : $CrawlerName" -ForegroundColor Green
 
 # --- 1. Create Glue Database ---
 Write-Host "`n[2/6] Creating Glue Data Catalog database '$DbName'..." -ForegroundColor Yellow
+@{Name = $DbName; Description = "Raw and clean order data"} | ConvertTo-Json -Compress | Set-Content -Path "$env:TEMP\glue_db.json" -Encoding ascii
 aws glue create-database `
-    --database-input "{`"Name`":`"$DbName`",`"Description`":`"Raw and clean order data`"}" `
+    --database-input "file://$env:TEMP\glue_db.json" `
     --region $Region 2>&1 | Out-Null
 Write-Host "       Database ready." -ForegroundColor Green
 
@@ -43,15 +44,17 @@ Write-Host "       Database ready." -ForegroundColor Green
 Write-Host "`n[3/6] Creating Glue Crawler '$CrawlerName'..." -ForegroundColor Yellow
 $ExistingCrawler = aws glue get-crawler --name $CrawlerName --query "Crawler.Name" --output text --region $Region 2>$null
 if ($ExistingCrawler -eq $CrawlerName) {
-    Write-Host "       Crawler already exists – skipping creation." -ForegroundColor Yellow
+    Write-Host "       Crawler already exists - skipping creation." -ForegroundColor Yellow
 } else {
+    @{S3Targets = @(@{Path = "s3://$RawBucket/raw/orders/"})} | ConvertTo-Json -Compress | Set-Content -Path "$env:TEMP\glue_targets.json" -Encoding ascii
+    @{UpdateBehavior = "UPDATE_IN_DATABASE"; DeleteBehavior = "LOG"} | ConvertTo-Json -Compress | Set-Content -Path "$env:TEMP\glue_schema_policy.json" -Encoding ascii
     aws glue create-crawler `
         --name $CrawlerName `
         --role $RoleArn `
         --database-name $DbName `
-        --targets "{`"S3Targets`":[{`"Path`":`"s3://$RawBucket/raw/orders/`"}]}" `
+        --targets "file://$env:TEMP\glue_targets.json" `
         --table-prefix "raw_" `
-        --schema-change-policy "{`"UpdateBehavior`":`"UPDATE_IN_DATABASE`",`"DeleteBehavior`":`"LOG`"}" `
+        --schema-change-policy "file://$env:TEMP\glue_schema_policy.json" `
         --region $Region | Out-Null
     Write-Host "       Crawler created." -ForegroundColor Green
 }

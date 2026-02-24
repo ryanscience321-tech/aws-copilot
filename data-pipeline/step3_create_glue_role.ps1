@@ -77,7 +77,7 @@ Write-Host "       S3 policy written to glue_s3_policy.json" -ForegroundColor Gr
 Write-Host "`n[4/5] Creating IAM role..." -ForegroundColor Yellow
 $ExistingRole = aws iam get-role --role-name $RoleName --query "Role.RoleName" --output text 2>$null
 if ($ExistingRole -eq $RoleName) {
-    Write-Host "       Role already exists – skipping creation." -ForegroundColor Yellow
+    Write-Host "       Role already exists - skipping creation." -ForegroundColor Yellow
 } else {
     aws iam create-role `
         --role-name $RoleName `

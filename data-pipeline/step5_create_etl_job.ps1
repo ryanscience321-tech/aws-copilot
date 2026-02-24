@@ -1,5 +1,5 @@
 # =============================================================
-# STEP 5 — Create the Glue ETL Job, Run It, and Monitor Progress
+# STEP 5 - Create the Glue ETL Job, Run It, and Monitor Progress
 #
 # WHAT THIS DOES:
 #   1. Uploads  glue_transform.py  to the scripts S3 bucket
@@ -13,7 +13,7 @@
 # =============================================================
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host " STEP 5: Glue ETL Job — Cleanse the Data" -ForegroundColor Cyan
+Write-Host " STEP 5: Glue ETL Job - Cleanse the Data" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
 Write-Host "`n[1/7] Reading pipeline config..." -ForegroundColor Yellow
@@ -48,39 +48,39 @@ Write-Host "`n[3/7] Creating Glue job '$JobName'..." -ForegroundColor Yellow
 $ExistingJob = aws glue get-job --job-name $JobName --query "Job.Name" --output text --region $Region 2>$null
 
 if ($ExistingJob -eq $JobName) {
-    Write-Host "       Job already exists – updating script location..." -ForegroundColor Yellow
+    Write-Host "       Job already exists - updating script location..." -ForegroundColor Yellow
     aws glue update-job `
         --job-name $JobName `
         --job-update "ScriptLocation=s3://$ScriptBucket/$ScriptKey" `
         --region $Region | Out-Null
 } else {
     # Glue version 4.0 = PySpark on Python 3.10 with auto-scaling DPUs
-    $DefaultArgs = @{
-        "--job-language"    = "python"
-        "--TempDir"         = "s3://$ScriptBucket/tmp/"
-        "--enable-metrics"  = ""
-        "--enable-continuous-cloudwatch-log" = "true"
-    } | ConvertTo-Json -Compress
+    $CmdJson = @{Name = "glueetl"; ScriptLocation = "s3://$ScriptBucket/$ScriptKey"; PythonVersion = "3"} | ConvertTo-Json -Compress
+    $CmdJson | Set-Content -Path "$env:TEMP\glue_cmd.json" -Encoding ascii
+
+    $DefArgs = @{"--job-language" = "python"; "--TempDir" = "s3://$ScriptBucket/tmp/"; "--enable-metrics" = ""; "--enable-continuous-cloudwatch-log" = "true"} | ConvertTo-Json -Compress
+    $DefArgs | Set-Content -Path "$env:TEMP\glue_defargs.json" -Encoding ascii
 
     aws glue create-job `
         --name $JobName `
         --role $RoleArn `
-        --command "{`"Name`":`"glueetl`",`"ScriptLocation`":`"s3://$ScriptBucket/$ScriptKey`",`"PythonVersion`":`"3`"}" `
+        --command "file://$env:TEMP\glue_cmd.json" `
         --glue-version "4.0" `
         --worker-type "G.1X" `
         --number-of-workers 2 `
         --timeout 30 `
-        --default-arguments "{`"--job-language`":`"python`",`"--TempDir`":`"s3://$ScriptBucket/tmp/`",`"--enable-metrics`":`"`",`"--enable-continuous-cloudwatch-log`":`"true`"}" `
+        --default-arguments "file://$env:TEMP\glue_defargs.json" `
         --region $Region | Out-Null
     Write-Host "       Job created." -ForegroundColor Green
 }
 
 # --- 3. Start the job run with our dynamic arguments ---
 Write-Host "`n[4/7] Starting job run..." -ForegroundColor Yellow
-$RunArgs = "{`"--INPUT_PATH`":`"$InputPath`",`"--OUTPUT_PATH`":`"$OutputPath`"}"
+$RunArgsObj = @{"--INPUT_PATH" = $InputPath; "--OUTPUT_PATH" = $OutputPath} | ConvertTo-Json -Compress
+$RunArgsObj | Set-Content -Path "$env:TEMP\glue_runargs.json" -Encoding ascii
 $RunId   = aws glue start-job-run `
     --job-name $JobName `
-    --arguments $RunArgs `
+    --arguments "file://$env:TEMP\glue_runargs.json" `
     --region $Region `
     --query "JobRunId" `
     --output text
@@ -109,7 +109,7 @@ do {
 if ($RunState -eq "SUCCEEDED") {
     Write-Host "`n       JOB SUCCEEDED" -ForegroundColor Green
 } else {
-    Write-Host "`n       JOB $RunState — check CloudWatch logs for details." -ForegroundColor Red
+    Write-Host "`n       JOB $RunState - check CloudWatch logs for details." -ForegroundColor Red
     $ErrorMsg = aws glue get-job-run `
         --job-name $JobName `
         --run-id $RunId `
@@ -135,7 +135,7 @@ Write-Host "`n  Your clean Parquet data is ready at:" -ForegroundColor Magenta
 Write-Host "  $OutputPath" -ForegroundColor White
 
 Write-Host "`n==========================================" -ForegroundColor Cyan
-Write-Host " STEP 5 COMPLETE  — Pipeline Finished!" -ForegroundColor Green
+Write-Host " STEP 5 COMPLETE  - Pipeline Finished!" -ForegroundColor Green
 Write-Host "" -ForegroundColor White
 Write-Host " To query the clean data with Athena:" -ForegroundColor White
 Write-Host "   Run .\step6_query_with_athena.ps1" -ForegroundColor White
