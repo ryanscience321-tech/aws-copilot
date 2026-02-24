@@ -1,0 +1,4 @@
+# Generated at runtime - contains AWS account ID and bucket names
+pipeline_config.json
+glue_trust_policy.json
+glue_s3_policy.json

@@ -1,0 +1,24 @@
+order_id,customer_name,email,order_date,product,quantity,unit_price,country,status
+1001,Alice Johnson,alice@example.com,2024-01-15,Laptop,1,999.99,USA,completed
+1002,bob smith,BOB@EXAMPLE.COM,15/01/2024,Mouse,2,29.99,usa,COMPLETED
+1003,Carol White,carol@example.com,2024-01-16,Keyboard,1,79.99,Canada,completed
+1004,,,2024-01-16,Monitor,1,349.99,UK,completed
+1005,Eve Davis,eve@example.com,2024-01-17,Laptop,1,999.99,USA,completed
+1001,Alice Johnson,alice@example.com,2024-01-15,Laptop,1,999.99,USA,completed
+1006,Frank Miller,frank@example.com,Jan 18 2024,Headphones,-1,149.99,Germany,completed
+1007,Grace Lee,grace@example.com,2024-01-18,,2,59.99,Australia,completed
+1008,Henry Brown,henry@example.com,2024-01-19,Webcam,0,-25.00,France,completed
+1009,Isla Clark,isla@example.com,2024-01-20,Tablet,1,499.99,Canada,Pending
+1010,Jack Wilson,jack@,2024-01-20,Mouse,3,29.99,USA,completed
+1011,Karen Martinez,,2024-01-21,Keyboard,2,79.99,Spain,completed
+1003,Carol White,carol@example.com,2024-01-16,Keyboard,1,79.99,Canada,completed
+1012,Liam Taylor,liam@example.com,2024-01-22,Laptop,1,999.99,USA,shipped
+1013,Mia Anderson,mia@example.com,2024/01/23,Monitor,2,349.99,UK,completed
+1014,Noah Thomas,noah@example.com,2024-01-23,NULL,1,149.99,Germany,completed
+1015,Olivia Jackson,olivia@example.com,2024-01-24,Webcam,1,59.99,,completed
+1016,  Peter White  ,peter@example.com,2024-01-25,Tablet,1,499.99,Canada,completed
+1017,Quinn Harris,quinn@example.com,2024-01-26,Mouse,999999,29.99,USA,completed
+1018,Rachel Martin,rachel@example.com,2024-01-27,Headphones,1,149.99,Australia,PENDING
+1016,  Peter White  ,peter@example.com,2024-01-25,Tablet,1,499.99,Canada,completed
+1019,Samuel Garcia,samuel@example.com,2024-01-28,Keyboard,1,79.99,Mexico,completed
+1020,Tina Brown,tina@example.com,2024-01-29,Laptop,1,,USA,completed
